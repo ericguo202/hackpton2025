@@ -1,0 +1,318 @@
+/* ===== GLOBAL STYLES ===== */
+  
+  /* ===== HERO SECTION (TOP) ===== */
+  .hero-section {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>');
+    opacity: 0.3;
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 3rem;
+    font-weight: 300;
+  }
+  
+  /* ===== SEARCH BAR ===== */
+  .search-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .search-form {
+    display: flex;
+    gap: 1rem;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 50px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+  }
+  
+  .search-form:focus-within {
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+  }
+  
+  .search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    color: #333;
+  }
+  
+  .search-input::placeholder {
+    color: #999;
+  }
+  
+  .search-button {
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+  
+  .search-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+  }
+  
+  .search-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* ===== SEARCH RESULTS ===== */
+  .search-results {
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .results-header {
+    color: white;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+  
+  .results-list {
+    list-style: none;
+    display: grid;
+    gap: 1rem;
+  }
+  
+  .result-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .result-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  .result-card-title {
+    font-size: 1.4rem;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .result-card-address {
+    color: #666;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+  }
+  
+  .result-card-description {
+    color: #333;
+    line-height: 1.6;
+    margin-top: 0.75rem;
+  }
+  
+  .error-message {
+    background: rgba(255, 255, 255, 0.95);
+    color: #e53e3e;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-weight: 500;
+  }
+  
+  /* ===== CHARITY SECTION (BOTTOM) ===== */
+  .charity-section {
+    min-height: 50vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5rem 2rem;
+    background: #f7fafc;
+  }
+  
+  .charity-content {
+    max-width: 700px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .charity-title {
+    font-size: 2.5rem;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+  
+  .charity-description {
+    font-size: 1.15rem;
+    color: #718096;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+  }
+  
+  .charity-buttons {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .charity-button {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 180px;
+  }
+  
+  .charity-button-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+  
+  .charity-button-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+  
+  .charity-button-secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+  }
+  
+  .charity-button-secondary:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+  }
+  
+  /* ===== RESPONSIVE DESIGN ===== */
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2.5rem;
+    }
+  
+    .hero-subtitle {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+  
+    .search-form {
+      flex-direction: column;
+      border-radius: 16px;
+      gap: 0.5rem;
+    }
+  
+    .search-input,
+    .search-button {
+      border-radius: 12px;
+      width: 100%;
+    }
+  
+    .charity-title {
+      font-size: 2rem;
+    }
+  
+    .charity-buttons {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .charity-button {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .hero-title {
+      font-size: 2rem;
+    }
+  
+    .hero-section {
+      padding: 3rem 1.5rem;
+    }
+  
+    .charity-section {
+      padding: 3rem 1.5rem;
+    }
+  }
+  
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .hero-content {
+    animation: fadeInUp 0.8s ease-out;
+  }
+  
+  .result-card {
+    animation: fadeInUp 0.5s ease-out backwards;
+  }
+  
+  .result-card:nth-child(1) { animation-delay: 0.1s; }
+  .result-card:nth-child(2) { animation-delay: 0.2s; }
+  .result-card:nth-child(3) { animation-delay: 0.3s; }
+  .result-card:nth-child(4) { animation-delay: 0.4s; }
+  .result-card:nth-child(5) { animation-delay: 0.5s; }

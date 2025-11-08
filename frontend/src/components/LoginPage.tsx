@@ -29,7 +29,9 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/charities/login', {
+      // Use relative URL since FastAPI serves the frontend
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiUrl}/charities/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
