@@ -128,7 +128,7 @@ async def serve_registration_page():
         return FileResponse(str(index_path))
     raise HTTPException(status_code=404, detail="Frontend not built. Run 'npm run build' in frontend directory.")
 
-@router.get("/charities/logout")
+@router.post("/charities/logout")
 async def charity_logout(response: Response, request: Request, r: RedisDep):
     sid = request.cookies.get("sid")
     if sid is None:
