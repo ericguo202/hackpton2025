@@ -37,11 +37,26 @@ export default function LoginPage() {
           'Content-Type': 'application/json',
         },
         credentials: 'include', // Important: allows cookies to be sent/received
+        redirect: 'manual', // Don't automatically follow redirects
         body: JSON.stringify({
           username: formData.username,
           password: formData.password,
         }),
       });
+  
+      // Check for redirect response (303)
+      if (response.type === 'opaqueredirect' || response.status === 303) {
+        // The backend set the cookie and wants to redirect
+        // Get the redirect location from the response
+        const location = response.headers.get('Location');
+        if (location) {
+          window.location.href = location;
+        } else {
+          // Fallback: just reload the page, the cookie is set
+          window.location.href = '/';
+        }
+        return;
+      }
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -53,18 +68,6 @@ export default function LoginPage() {
         }
         setIsLoading(false);
         return;
-      }
-
-      // Handle redirect (backend returns 303 redirect)
-      // You can either follow the redirect or handle it manually
-      const redirectUrl = response.headers.get('Location');
-      if (redirectUrl) {
-        window.location.href = redirectUrl;
-      } else {
-        // Fallback: redirect to charity page
-        // You'll need to get the charity name from somewhere
-        // For now, just redirect to home or a dashboard
-        window.location.href = '/';
       }
     } catch (err) {
       setError('Network error. Please check your connection.');
