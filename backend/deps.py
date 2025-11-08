@@ -16,7 +16,6 @@ DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 def get_session() -> Generator[Session, None, None]:
-    """Per-request DB session."""
     with Session(engine) as session:
         yield session
 

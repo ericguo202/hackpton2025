@@ -2,10 +2,11 @@ from contextlib import asynccontextmanager
 import os
 import redis
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel
+from routes import routes 
 
 from deps import engine 
-from routes import routes 
 
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
@@ -30,7 +31,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-app.include_router(routes.router, prefix="/notes", tags=["notes"])
+app.include_router(routes.router, tags=["notes"])
 
 @app.get("/health")
 def health():
