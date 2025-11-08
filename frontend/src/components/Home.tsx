@@ -157,7 +157,7 @@ export default function Home() {
           <div className="charity-buttons">
             <button
               className="charity-button charity-button-primary"
-              onClick={() => (window.location.href = "/charities/register")}
+              onClick={() => (window.location.href = "/charities/new")}
             >
               Register as Charity
             </button>
