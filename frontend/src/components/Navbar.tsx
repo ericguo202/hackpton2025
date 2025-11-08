@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 interface Charity {
   id: number;
   username: string;
@@ -21,8 +23,7 @@ export default function Navbar() {
     // Check if user is logged in by trying to fetch current session
     const checkAuth = async () => {
       try {
-        // You'll need to add this endpoint to your backend
-        const response = await fetch('http://localhost:8000/charities/me', {
+        const response = await fetch(`${API_BASE_URL}/charities/me`, {
           method: 'GET',
           credentials: 'include', // Send cookies
         });
@@ -46,8 +47,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      // You'll need to add this endpoint to your backend
-      await fetch('http://localhost:8000/charities/logout', {
+      await fetch(`${API_BASE_URL}/charities/logout`, {
         method: 'POST',
         credentials: 'include',
       });

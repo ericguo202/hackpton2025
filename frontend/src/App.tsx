@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import LoginPage from "@/components/LoginPage";
 import Home from "@/components/Home";
+import RegisterPage from "@/components/RegisterPage";
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -17,6 +18,10 @@ export default function App() {
   // Route based on current path
   if (currentPath === "/charities/login") {
     return <LoginPage />;
+  }
+
+  if (currentPath === "/charities/new") {
+    return <RegisterPage />;
   }
 
   // Default to Home page
