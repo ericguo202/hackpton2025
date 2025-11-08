@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import Navbar from "@/components/Navbar";
 
 interface LoginFormData {
   username: string;
@@ -76,6 +77,8 @@ export default function LoginPage() {
   };
 
   return (
+    <>
+    <Navbar />
     <div>
       <h1>Charity Login</h1>
       
@@ -114,5 +117,6 @@ export default function LoginPage() {
         </button>
       </form>
     </div>
+    </>
   );
 }

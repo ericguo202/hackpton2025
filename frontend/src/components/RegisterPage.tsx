@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import Navbar from "@/components/Navbar";
 
 interface RegisterFormData {
   username: string;
@@ -135,6 +136,8 @@ export default function RegisterPage() {
   };
 
   return (
+    <>
+    <Navbar />
     <div>
       <h1>Charity Registration</h1>
 
@@ -234,5 +237,6 @@ export default function RegisterPage() {
         </button>
       </form>
     </div>
+    </>
   );
 }
