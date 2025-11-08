@@ -7,12 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, select 
 from sqlalchemy.ext.asyncio import AsyncEngine
-from deps import engine
+from deps import engine, SessionDep
 from routes import routes
 from deps import RedisDep
 from rate_limit import RateLimitMiddleware
+from models.dbmodels import Charity
+from sqlalchemy.ext.asyncio import AsyncSession
 
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
@@ -22,6 +24,40 @@ REDIS_DB   = int(os.getenv("REDIS_DB", "0"))
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
+    async with AsyncSession(engine) as session:
+        result = await session.execute(select(Charity))
+        existing = result.scalars().all()
+
+        if len(existing) == 0:  
+            e1 = Charity(
+                id=1,
+                username="david123",
+                password="david123", 
+                name="The david foundation",
+                address="67 street",
+                description="awesome charity",
+                website="coolwebsite.com",
+                contact="david123@gmail.com",
+                needs_donations=True,
+                needs_volunteers=False,
+                is_approved=True,
+            )
+
+            e2 = Charity(
+                id=2,
+                username="chungus",
+                password="bignuts67",  
+                name="Hawktuah simulator",
+                address="65 Glendale Ave",
+                description="best charity",
+                website="hi@gmail.com",
+                contact="fattymatt@gmail.com",
+                needs_donations=True,
+                needs_volunteers=True,
+            )
+
+            session.add_all([e1, e2])
+            await session.commit()
 
     app.state.redis = redis.Redis(
         host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True
