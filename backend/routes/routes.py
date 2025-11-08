@@ -1,6 +1,7 @@
 from typing import Optional
+from pathlib import Path
 from fastapi import APIRouter, HTTPException, status, Response, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from sqlmodel import SQLModel, Field, select
 from deps import SessionDep, RedisDep
 from models.dbmodels import Charity
@@ -13,7 +14,10 @@ import uuid
 
 router = APIRouter()
 
-@router.get("/")
+# Path to frontend build directory
+frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
+
+@router.get("/") 
 def home():
     return {"status": "ok"}
 
@@ -62,8 +66,12 @@ async def new_charity(data: CharityCreate, db: SessionDep, r: RedisDep):
 
 
 @router.get("/charities/login")
-def charity_login_page():
-    return {"status": "ok"}
+async def serve_login_page():
+    """Serve the React app for the login page"""
+    index_path = frontend_dist / "index.html"
+    if index_path.exists():
+        return FileResponse(str(index_path))
+    raise HTTPException(status_code=404, detail="Frontend not built. Run 'npm run build' in frontend directory.")
 
 
 @router.post("/charities/login")
