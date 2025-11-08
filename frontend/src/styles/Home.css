@@ -2,12 +2,12 @@
   
   /* ===== HERO SECTION (TOP) ===== */
   .hero-section {
-    min-height: 70vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #004225 0%, #004225 100%);
     padding: 4rem 2rem;
     position: relative;
     overflow: hidden;
@@ -31,18 +31,27 @@
     width: 100%;
     text-align: center;
   }
+
+  .company-name {
+    font-size: 4rem;
+    font-weight: 800;
+    color: #FFB000;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  }
   
   .hero-title {
-    font-size: 3.5rem;
+    font-size: 3rem;
     font-weight: 700;
-    color: white;
+    color: #F5F5DC;
     margin-bottom: 1rem;
     letter-spacing: -0.02em;
   }
   
   .hero-subtitle {
     font-size: 1.25rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: #FFCF9D;
     margin-bottom: 3rem;
     font-weight: 300;
   }
@@ -57,15 +66,15 @@
   .search-form {
     display: flex;
     gap: 1rem;
-    background: white;
+    background: #F5F5DC;
     padding: 0.5rem;
     border-radius: 50px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
   }
   
   .search-form:focus-within {
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 15px 50px rgba(255, 176, 0, 0.3);
     transform: translateY(-2px);
   }
   
@@ -76,17 +85,18 @@
     padding: 1rem 1.5rem;
     font-size: 1.1rem;
     border-radius: 50px;
-    color: #333;
+    color: #004225;
+    background: #F5F5DC;
   }
   
   .search-input::placeholder {
-    color: #999;
+    color: #666;
   }
   
   .search-button {
     padding: 1rem 2.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: #FFB000;
+    color: #004225;
     border: none;
     border-radius: 50px;
     font-size: 1.1rem;
@@ -98,7 +108,8 @@
   
   .search-button:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 20px rgba(255, 176, 0, 0.5);
+    background: #FFCF9D;
   }
   
   .search-button:disabled {
@@ -141,7 +152,7 @@
   
   .result-card-title {
     font-size: 1.4rem;
-    color: #667eea;
+    color: #004225;
     margin-bottom: 0.5rem;
     font-weight: 600;
   }
@@ -159,12 +170,13 @@
   }
   
   .error-message {
-    background: rgba(255, 255, 255, 0.95);
-    color: #e53e3e;
+    background: #F5F5DC;
+    color: #d32f2f;
     padding: 1rem 1.5rem;
     border-radius: 8px;
     margin-top: 1rem;
     font-weight: 500;
+    border: 2px solid #FFB000;
   }
   
   /* ===== CHARITY SECTION (BOTTOM) ===== */
@@ -175,7 +187,7 @@
     justify-content: center;
     align-items: center;
     padding: 5rem 2rem;
-    background: #f7fafc;
+    background: #F5F5DC;
   }
   
   .charity-content {
@@ -186,16 +198,17 @@
   
   .charity-title {
     font-size: 2.5rem;
-    color: #2d3748;
+    color: #004225;
     margin-bottom: 1rem;
     font-weight: 700;
   }
   
   .charity-description {
     font-size: 1.15rem;
-    color: #718096;
+    color: #004225;
     margin-bottom: 2.5rem;
     line-height: 1.6;
+    opacity: 0.8;
   }
   
   .charity-buttons {
@@ -217,31 +230,36 @@
   }
   
   .charity-button-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    background: #FFB000;
+    color: #004225;
+    box-shadow: 0 4px 15px rgba(255, 176, 0, 0.3);
   }
   
   .charity-button-primary:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(255, 176, 0, 0.4);
+    background: #FFCF9D;
   }
   
   .charity-button-secondary {
-    background: white;
-    color: #667eea;
-    border: 2px solid #667eea;
+    background: #F5F5DC;
+    color: #004225;
+    border: 2px solid #004225;
   }
   
   .charity-button-secondary:hover {
-    background: #667eea;
-    color: white;
+    background: #004225;
+    color: #F5F5DC;
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 6px 20px rgba(0, 66, 37, 0.3);
   }
   
   /* ===== RESPONSIVE DESIGN ===== */
   @media (max-width: 768px) {
+    .company-name {
+      font-size: 3rem;
+    }
+
     .hero-title {
       font-size: 2.5rem;
     }
@@ -278,6 +296,10 @@
   }
   
   @media (max-width: 480px) {
+    .company-name {
+      font-size: 2.5rem;
+    }
+
     .hero-title {
       font-size: 2rem;
     }

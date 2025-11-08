@@ -71,109 +71,112 @@ export default function Home() {
 
   return (
     <>
-    <Navbar />
-    <div className="home-container">
-      {/* Hero Section: Zip Code Search */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <h1 className="hero-title">Find Local Charities</h1>
-          <p className="hero-subtitle">
-            Discover charities in your area and make a difference in your
-            community
-          </p>
+      <Navbar />
+      <div className="home-container">
+        {/* Hero Section: Zip Code Search */}
+        <section className="hero-section">
+          <div className="hero-content">
+            <h1 className="company-name">NeverHungry</h1>
+            <h2 className="hero-title">Find Local Charities</h2>
+            <p className="hero-subtitle">
+              Discover charities in your area and make a difference in your
+              community
+            </p>
 
-          <div className="search-container">
-            <form className="search-form" onSubmit={handleZipCodeSearch}>
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Enter your zip code"
-                value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
-                maxLength={5}
-              />
+            <div className="search-container">
+              <form className="search-form" onSubmit={handleZipCodeSearch}>
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Enter your zip code"
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                  maxLength={5}
+                />
+                <button
+                  type="submit"
+                  className="search-button"
+                  disabled={isSearching}
+                >
+                  {isSearching ? "Searching..." : "Search"}
+                </button>
+              </form>
+
+              {searchError && (
+                <div className="error-message">{searchError}</div>
+              )}
+
+              {searchResults.length > 0 && (
+                <div className="search-results">
+                  <h3 className="results-header">
+                    Found {searchResults.length}{" "}
+                    {searchResults.length === 1 ? "charity" : "charities"}
+                  </h3>
+                  <ul className="results-list">
+                    {searchResults.map((charity) => (
+                      <li key={charity.id} className="result-card">
+                        <h4 className="result-card-title">{charity.name}</h4>
+                        <p className="result-card-address">{charity.address}</p>
+                        {charity.description && (
+                          <p className="result-card-description">
+                            {charity.description}
+                          </p>
+                        )}
+                        {charity.contact && (
+                          <p className="result-card-description">
+                            <strong>Contact:</strong> {charity.contact}
+                          </p>
+                        )}
+                        {charity.website && (
+                          <p className="result-card-description">
+                            <strong>Website:</strong>{" "}
+                            <a
+                              href={charity.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color: "#004225",
+                                textDecoration: "underline",
+                              }}
+                            >
+                              {charity.website}
+                            </a>
+                          </p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Charity Registration/Login Section */}
+        <section className="charity-section">
+          <div className="charity-content">
+            <h2 className="charity-title">Are you a charity?</h2>
+            <p className="charity-description">
+              Register or log in to connect with volunteers and donors in your
+              community
+            </p>
+            <div className="charity-buttons">
               <button
-                type="submit"
-                className="search-button"
-                disabled={isSearching}
+                className="charity-button charity-button-primary"
+                onClick={() => (window.location.href = "/charities/new")}
               >
-                {isSearching ? "Searching..." : "Search"}
+                Register as Charity
               </button>
-            </form>
-
-            {searchError && <div className="error-message">{searchError}</div>}
-
-            {searchResults.length > 0 && (
-              <div className="search-results">
-                <h3 className="results-header">
-                  Found {searchResults.length}{" "}
-                  {searchResults.length === 1 ? "charity" : "charities"}
-                </h3>
-                <ul className="results-list">
-                  {searchResults.map((charity) => (
-                    <li key={charity.id} className="result-card">
-                      <h4 className="result-card-title">{charity.name}</h4>
-                      <p className="result-card-address">{charity.address}</p>
-                      {charity.description && (
-                        <p className="result-card-description">
-                          {charity.description}
-                        </p>
-                      )}
-                      {charity.contact && (
-                        <p className="result-card-description">
-                          <strong>Contact:</strong> {charity.contact}
-                        </p>
-                      )}
-                      {charity.website && (
-                        <p className="result-card-description">
-                          <strong>Website:</strong>{" "}
-                          <a
-                            href={charity.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              color: "#667eea",
-                              textDecoration: "underline",
-                            }}
-                          >
-                            {charity.website}
-                          </a>
-                        </p>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+              <button
+                className="charity-button charity-button-secondary"
+                onClick={() => (window.location.href = "/charities/login")}
+              >
+                Log In
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
-
-      {/* Charity Registration/Login Section */}
-      <section className="charity-section">
-        <div className="charity-content">
-          <h2 className="charity-title">Are you a charity?</h2>
-          <p className="charity-description">
-            Register or log in to connect with volunteers and donors in your
-            community
-          </p>
-          <div className="charity-buttons">
-            <button
-              className="charity-button charity-button-primary"
-              onClick={() => (window.location.href = "/charities/new")}
-            >
-              Register as Charity
-            </button>
-            <button
-              className="charity-button charity-button-secondary"
-              onClick={() => (window.location.href = "/charities/login")}
-            >
-              Log In
-            </button>
-          </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
     </>
   );
 }
