@@ -22,19 +22,6 @@ def home():
     return {"status": "ok"}
 
 
-
-@router.get("/charities/logout")
-async def charity_logout(response: Response, request: Request, r: RedisDep):
-    sid = request.cookies.get("sid")
-    if sid is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-   
-    await r.delete(f"session:{sid}")
-    response.delete_cookie(key="sid")
-    return {"ok": True}
-
-
-
 @router.get("/charities", response_model=list[CharityRead])
 async def charities(db: SessionDep, r: RedisDep):
     ver = await _get_ver(r)  
@@ -110,6 +97,46 @@ async def charity_login(
     )
     return resp
 
+@router.get("/charities/me", response_model=CharityRead)
+async def get_current_charity(db: SessionDep, r: RedisDep, request: Request):
+    """Get the currently logged-in charity based on session cookie"""
+    sid = request.cookies.get("sid")
+    if not sid:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not logged in")
+    
+    # Get session from Redis
+    session_data = await r.get(f"session:{sid}")
+    if not session_data:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired")
+    
+    session = json.loads(session_data)
+    user_id = session.get("user_id")
+    
+    # Fetch charity from database
+    charity = await db.get(Charity, user_id)
+    if not charity:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Charity not found")
+    
+    return charity
+
+
+@router.get("/charities/new")
+async def serve_registration_page():
+    """Serve the React app for the registration page"""
+    index_path = frontend_dist / "index.html"
+    if index_path.exists():
+        return FileResponse(str(index_path))
+    raise HTTPException(status_code=404, detail="Frontend not built. Run 'npm run build' in frontend directory.")
+
+@router.get("/charities/logout")
+async def charity_logout(response: Response, request: Request, r: RedisDep):
+    sid = request.cookies.get("sid")
+    if sid is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+   
+    await r.delete(f"session:{sid}")
+    response.delete_cookie(key="sid")
+    return {"ok": True}
 
 @router.get("/charities/{id}", response_model=CharityRead, name="get_charity")
 async def get_charity(id: int, db: SessionDep, r: RedisDep):
