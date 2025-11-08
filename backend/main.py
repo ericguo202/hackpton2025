@@ -4,12 +4,15 @@ from pathlib import Path
 import redis.asyncio as redis
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import AsyncEngine
 from deps import engine
 from routes import routes
+from deps import RedisDep
+from rate_limit import RateLimitMiddleware
 
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
@@ -31,7 +34,28 @@ async def lifespan(app: FastAPI):
         if r is not None:
             await r.aclose()
         await engine.dispose()
+
+
+
+
+
+
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.add_middleware(
+    RateLimitMiddleware,
+    limit=10,
+    window=60,
+    paths=["/charities/login"],  
+)
 
 # Include API routes first (before static files)
 app.include_router(routes.router, tags=["notes"])
