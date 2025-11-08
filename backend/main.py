@@ -30,7 +30,6 @@ async def lifespan(app: FastAPI):
 
         if len(existing) == 0:  
             e1 = Charity(
-                id=1,
                 username="david123",
                 password="david123", 
                 name="The david foundation",
@@ -44,7 +43,6 @@ async def lifespan(app: FastAPI):
             )
 
             e2 = Charity(
-                id=2,
                 username="chungus",
                 password="bignuts67",  
                 name="Hawktuah simulator",
