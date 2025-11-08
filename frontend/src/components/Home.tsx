@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../styles/Home.css";
+import Navbar from "@/components/Navbar";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -69,6 +70,8 @@ export default function Home() {
   };
 
   return (
+    <>
+    <Navbar />
     <div className="home-container">
       {/* Hero Section: Zip Code Search */}
       <section className="hero-section">
@@ -171,5 +174,6 @@ export default function Home() {
         </div>
       </section>
     </div>
+    </>
   );
 }
