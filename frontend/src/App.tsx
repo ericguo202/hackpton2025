@@ -5,6 +5,7 @@ import RegisterPage from "@/components/RegisterPage";
 import ShowPage from "@/components/ShowPage";
 import EditPage from "@/components/EditPage";
 import IndexPage from "@/components/IndexPage";
+import VolunteerMapDashboard from "@/components/VolunteerMapDashboard";
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -29,6 +30,10 @@ export default function App() {
 
   if (currentPath === "/charities/index") {
     return <IndexPage />;
+  }
+
+  if (currentPath === "/volunteer-dashboard") {
+    return <VolunteerMapDashboard />;
   }
 
   // Match /charities/{id}/edit pattern

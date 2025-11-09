@@ -27,8 +27,8 @@ interface Charity {
   };
 }
 
-export default function IndexPage() {
-  const [charities, setCharities] = useState<Charity[]>([]);
+export default function VolunteerMapDashboard() {
+  const [filteredCharities, setFilteredCharities] = useState<Charity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -39,7 +39,7 @@ export default function IndexPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  // Fetch charities data
+  // Fetch charities data and filter
   useEffect(() => {
     const fetchCharities = async () => {
       try {
@@ -48,7 +48,12 @@ export default function IndexPage() {
           throw new Error("Failed to fetch charities");
         }
         const data: Charity[] = await response.json();
-        setCharities(data);
+        
+        // Filter to only show charities that need volunteers OR donations
+        const filtered = data.filter(
+          (charity) => charity.needs_volunteers || charity.needs_donations
+        );
+        setFilteredCharities(filtered);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "An error occurred"
@@ -61,9 +66,25 @@ export default function IndexPage() {
     fetchCharities();
   }, []);
 
+  // Determine marker color based on needs
+  const getMarkerColor = (charity: Charity): string => {
+    const needsBoth = charity.needs_volunteers && charity.needs_donations;
+    const needsVolunteers = charity.needs_volunteers && !charity.needs_donations;
+    const needsDonations = charity.needs_donations && !charity.needs_volunteers;
+
+    if (needsBoth) {
+      return "#9333EA"; // Purple - needs both
+    } else if (needsVolunteers) {
+      return "#16A34A"; // Green - needs volunteers
+    } else if (needsDonations) {
+      return "#FFB000"; // Gold - needs donations
+    }
+    return "#004225"; // Default dark green (shouldn't happen due to filtering)
+  };
+
   // Initialize map and add markers
   useEffect(() => {
-    if (!mapContainer.current || isLoading || error || charities.length === 0) {
+    if (!mapContainer.current || isLoading || error || filteredCharities.length === 0) {
       return;
     }
 
@@ -76,17 +97,17 @@ export default function IndexPage() {
     if (!map.current) {
       mapboxgl.accessToken = MAPBOX_TOKEN;
 
-      // Calculate center point from all charities
+      // Calculate center point from filtered charities
       const avgLng =
-        charities.reduce(
+        filteredCharities.reduce(
           (sum, charity) => sum + charity.geojson.geometry.coordinates[0],
           0
-        ) / charities.length;
+        ) / filteredCharities.length;
       const avgLat =
-        charities.reduce(
+        filteredCharities.reduce(
           (sum, charity) => sum + charity.geojson.geometry.coordinates[1],
           0
-        ) / charities.length;
+        ) / filteredCharities.length;
 
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
@@ -98,14 +119,15 @@ export default function IndexPage() {
       // Add navigation controls
       map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-      // Add markers for each charity
-      charities.forEach((charity) => {
+      // Add markers for each filtered charity
+      filteredCharities.forEach((charity) => {
         if (!charity.geojson?.geometry?.coordinates) {
           console.warn(`Charity ${charity.id} missing coordinates`);
           return;
         }
 
         const [lng, lat] = charity.geojson.geometry.coordinates;
+        const markerColor = getMarkerColor(charity);
 
         // Create popup content
         const popupContent = `
@@ -121,9 +143,21 @@ export default function IndexPage() {
                 ${charity.description.substring(0, 100)}${charity.description.length > 100 ? "..." : ""}
               </p>
             ` : ""}
+            <div style="margin-bottom: 8px;">
+              ${charity.needs_volunteers ? `
+                <span style="display: inline-block; padding: 4px 8px; background: #dcfce7; border: 1px solid #16A34A; border-radius: 4px; font-size: 11px; margin-right: 4px; margin-bottom: 4px; color: #166534;">
+                  ✓ Needs Volunteers
+                </span>
+              ` : ""}
+              ${charity.needs_donations ? `
+                <span style="display: inline-block; padding: 4px 8px; background: #FFCF9D; border: 1px solid #FFB000; border-radius: 4px; font-size: 11px; margin-bottom: 4px; color: #92400e;">
+                  ✓ Needs Donations
+                </span>
+              ` : ""}
+            </div>
             <a 
               href="/charities/${charity.id}" 
-              style="display: inline-block; padding: 6px 12px; background: #FFB000; color: #004225; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; transition: background 0.2s; margin-top: 8px;"
+              style="display: inline-block; padding: 6px 12px; background: #FFB000; color: #004225; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px; transition: background 0.2s;"
               onmouseover="this.style.background='#FFCF9D'"
               onmouseout="this.style.background='#FFB000'"
             >
@@ -139,8 +173,8 @@ export default function IndexPage() {
           closeOnClick: false,
         }).setHTML(popupContent);
 
-        // Create marker and add to map (popup opens on click by default)
-        new mapboxgl.Marker({ color: "#FFB000" })
+        // Create marker with color coding
+        new mapboxgl.Marker({ color: markerColor })
           .setLngLat([lng, lat])
           .setPopup(popup)
           .addTo(map.current!);
@@ -154,7 +188,7 @@ export default function IndexPage() {
         map.current = null;
       }
     };
-  }, [charities, isLoading, error]);
+  }, [filteredCharities, isLoading, error]);
 
   // Handle zip code search and map centering
   const handleZipCodeSearch = async (e: React.FormEvent) => {
@@ -171,7 +205,6 @@ export default function IndexPage() {
 
     try {
       // Step 1: Use /api/suggest to search for the zip code
-      // This endpoint searches Mapbox and returns suggestions
       const suggestResponse = await fetch(
         `${API_BASE_URL}/api/suggest?q=${zipCode}&limit=1&types=postcode`
       );
@@ -193,7 +226,6 @@ export default function IndexPage() {
       const mapboxId = suggestData.suggestions[0].mapbox_id;
 
       // Step 2: Use /api/retrieve to get full details including coordinates
-      // This endpoint retrieves complete information about the location
       const retrieveResponse = await fetch(
         `${API_BASE_URL}/api/retrieve/${mapboxId}`
       );
@@ -217,9 +249,9 @@ export default function IndexPage() {
       if (map.current) {
         map.current.flyTo({
           center: [lng, lat],
-          zoom: 12, // Good zoom level for zip code area
-          duration: 2000, // 2 second smooth animation
-          essential: true // This animation is considered essential with respect to prefers-reduced-motion
+          zoom: 12,
+          duration: 2000,
+          essential: true
         });
       }
 
@@ -253,7 +285,7 @@ export default function IndexPage() {
               margin: "0 0 0.5rem 0",
             }}
           >
-            Find Charities Near You
+            Charities Seeking Help
           </h1>
           <p
             style={{
@@ -262,7 +294,7 @@ export default function IndexPage() {
               margin: 0,
             }}
           >
-            Click on any marker to learn more about a charity
+            Find organizations that need volunteers or donations
           </p>
         </div>
 
@@ -440,6 +472,89 @@ export default function IndexPage() {
                     </div>
                   )}
                 </form>
+              </div>
+
+              {/* Legend Overlay */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "1rem",
+                  left: "1rem",
+                  zIndex: 1000,
+                  backgroundColor: "white",
+                  padding: "1rem",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+                  border: "2px solid #004225",
+                  minWidth: "280px",
+                }}
+              >
+                <h3
+                  style={{
+                    margin: "0 0 0.75rem 0",
+                    fontSize: "0.95rem",
+                    fontWeight: "700",
+                    color: "#004225",
+                  }}
+                >
+                  Legend
+                </h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <div
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        backgroundColor: "#9333EA",
+                        borderRadius: "50%",
+                        border: "2px solid #004225",
+                      }}
+                    />
+                    <span style={{ fontSize: "0.85rem", color: "#004225" }}>
+                      Needs Both Volunteers & Donations
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <div
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        backgroundColor: "#16A34A",
+                        borderRadius: "50%",
+                        border: "2px solid #004225",
+                      }}
+                    />
+                    <span style={{ fontSize: "0.85rem", color: "#004225" }}>
+                      Needs Volunteers Only
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <div
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        backgroundColor: "#FFB000",
+                        borderRadius: "50%",
+                        border: "2px solid #004225",
+                      }}
+                    />
+                    <span style={{ fontSize: "0.85rem", color: "#004225" }}>
+                      Needs Donations Only
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      marginTop: "0.5rem",
+                      paddingTop: "0.5rem",
+                      borderTop: "1px solid #e5e7eb",
+                      fontSize: "0.8rem",
+                      color: "#666",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Showing {filteredCharities.length} {filteredCharities.length === 1 ? "charity" : "charities"}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

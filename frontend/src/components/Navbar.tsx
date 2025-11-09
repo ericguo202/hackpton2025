@@ -94,6 +94,12 @@ export default function Navbar() {
           // Not logged in state
           <>
             <a
+              href="/volunteer-dashboard"
+              className="no-underline text-[#004225] font-medium hover:text-[#FFB000] transition-colors duration-300"
+            >
+              Volunteer Dashboard
+            </a>
+            <a
               href="/charities/login"
               className="no-underline text-[#004225] font-medium hover:text-[#FFB000] transition-colors duration-300"
             >
