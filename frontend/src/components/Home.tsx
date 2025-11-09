@@ -122,7 +122,8 @@ export default function Home() {
                 Welcome, {currentCharity.name}!
               </h1>
               <p className="text-2xl md:text-xl text-[#F5F5DC] mb-8 font-light">
-                Need volunteers or donations? Keep your charity information up to date.
+                Need volunteers or donations? Keep your charity information up
+                to date.
               </p>
               <a
                 href={`/charities/${currentCharity.id}/edit`}
@@ -140,28 +141,38 @@ export default function Home() {
                 <h2 className="text-3xl font-bold text-[#004225] mb-6">
                   Your Charity Profile
                 </h2>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-[#004225] mb-1">Address</h3>
+                    <h3 className="text-lg font-semibold text-[#004225] mb-1">
+                      Address
+                    </h3>
                     <p className="text-gray-700">{currentCharity.address}</p>
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold text-[#004225] mb-1">Description</h3>
-                    <p className="text-gray-700">{currentCharity.description || "No description provided"}</p>
+                    <h3 className="text-lg font-semibold text-[#004225] mb-1">
+                      Description
+                    </h3>
+                    <p className="text-gray-700">
+                      {currentCharity.description || "No description provided"}
+                    </p>
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold text-[#004225] mb-1">Contact</h3>
+                    <h3 className="text-lg font-semibold text-[#004225] mb-1">
+                      Contact
+                    </h3>
                     <p className="text-gray-700">{currentCharity.contact}</p>
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold text-[#004225] mb-1">Website</h3>
-                    <a 
-                      href={currentCharity.website} 
-                      target="_blank" 
+                    <h3 className="text-lg font-semibold text-[#004225] mb-1">
+                      Website
+                    </h3>
+                    <a
+                      href={currentCharity.website}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#FFB000] hover:text-[#FFCF9D] underline"
                     >
@@ -170,21 +181,31 @@ export default function Home() {
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold text-[#004225] mb-2">Current Needs</h3>
+                    <h3 className="text-lg font-semibold text-[#004225] mb-2">
+                      Current Needs
+                    </h3>
                     <div className="flex gap-3 flex-wrap">
-                      <span className={`py-2 px-4 rounded-lg font-medium ${
-                        currentCharity.needs_volunteers 
-                          ? "bg-green-100 text-green-800 border-2 border-green-500" 
-                          : "bg-gray-100 text-gray-600 border-2 border-gray-300"
-                      }`}>
-                        {currentCharity.needs_volunteers ? "✓ Needs Volunteers" : "Not Seeking Volunteers"}
+                      <span
+                        className={`py-2 px-4 rounded-lg font-medium ${
+                          currentCharity.needs_volunteers
+                            ? "bg-green-100 text-green-800 border-2 border-green-500"
+                            : "bg-gray-100 text-gray-600 border-2 border-gray-300"
+                        }`}
+                      >
+                        {currentCharity.needs_volunteers
+                          ? "✓ Needs Volunteers"
+                          : "Not Seeking Volunteers"}
                       </span>
-                      <span className={`py-2 px-4 rounded-lg font-medium ${
-                        currentCharity.needs_donations 
-                          ? "bg-green-100 text-green-800 border-2 border-green-500" 
-                          : "bg-gray-100 text-gray-600 border-2 border-gray-300"
-                      }`}>
-                        {currentCharity.needs_donations ? "✓ Needs Donations" : "Not Seeking Donations"}
+                      <span
+                        className={`py-2 px-4 rounded-lg font-medium ${
+                          currentCharity.needs_donations
+                            ? "bg-green-100 text-green-800 border-2 border-green-500"
+                            : "bg-gray-100 text-gray-600 border-2 border-gray-300"
+                        }`}
+                      >
+                        {currentCharity.needs_donations
+                          ? "✓ Needs Donations"
+                          : "Not Seeking Donations"}
                       </span>
                     </div>
                   </div>
@@ -215,7 +236,7 @@ export default function Home() {
         <section className="min-h-screen flex flex-col justify-center items-center bg-[#004225] py-16 px-8 relative overflow-hidden">
           <div className="relative z-10 max-w-[700px] w-full text-center animate-[fadeInUp_0.8s_ease-out]">
             <h1 className="text-6xl md:text-5xl sm:text-4xl font-extrabold text-[#FFB000] mb-6 tracking-wider drop-shadow-[2px_2px_4px_rgba(0,0,0,0.3)]">
-              NeverHungry
+              NeverHunger
             </h1>
             <h2 className="text-5xl md:text-4xl sm:text-3xl font-bold text-[#F5F5DC] mb-4 tracking-tight">
               Find Local Charities

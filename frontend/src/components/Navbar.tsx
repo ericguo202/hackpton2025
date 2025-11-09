@@ -66,7 +66,7 @@ export default function Navbar() {
           href="/"
           className="no-underline text-[#004225] hover:text-[#FFB000] transition-colors duration-300"
         >
-          NeverHungry.org
+          NeverHunger.org
         </a>
       </div>
 

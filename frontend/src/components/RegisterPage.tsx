@@ -119,7 +119,7 @@ export default function RegisterPage() {
               Register Your Charity
             </h1>
             <p className="text-[#004225] opacity-80 text-center mb-8">
-              Join NeverHungry and connect with volunteers and donors
+              Join NeverHunger and connect with volunteers and donors
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
