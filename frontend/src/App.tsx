@@ -4,6 +4,7 @@ import Home from "@/components/Home";
 import RegisterPage from "@/components/RegisterPage";
 import ShowPage from "@/components/ShowPage";
 import EditPage from "@/components/EditPage";
+import IndexPage from "@/components/IndexPage";
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -24,6 +25,10 @@ export default function App() {
 
   if (currentPath === "/charities/new") {
     return <RegisterPage />;
+  }
+
+  if (currentPath === "/charities/index") {
+    return <IndexPage />;
   }
 
   // Match /charities/{id}/edit pattern
