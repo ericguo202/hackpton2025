@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Any
 from urllib.parse import quote
 from pathlib import Path
-from fastapi import APIRouter, HTTPException, status, Response, Request
+from fastapi import APIRouter, HTTPException, status, Response, Request, Query
 from fastapi.responses import RedirectResponse, FileResponse
 from sqlmodel import SQLModel, Field, select
 from deps import SessionDep, RedisDep
@@ -17,10 +17,12 @@ import os
 import httpx
 
 
+
 load_dotenv()
 MAPBOX_TOKEN = os.getenv("MAPBOX_API_TOKEN")  
 MAPBOX_GEOCODE_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/{query}.json"
 MAPBOX_RETRIEVE_URL = "https://api.mapbox.com/search/searchbox/v1/retrieve/{mapbox_id}"
+BASE = "https://api.mapbox.com/search/searchbox/v1"
 
 router = APIRouter()
 
@@ -295,3 +297,91 @@ async def geocode_address_to_features(address: str) -> dict:
             "source": "mapbox",
         },
     }
+
+
+def ensure_session_token(st: Optional[str]) -> str:
+    try:
+        return st or str(uuid.uuid4())
+    except Exception:
+        return str(uuid.uuid4())
+
+@router.get("/api/suggest")
+async def suggest(
+    q: str = Query(..., max_length=256),
+    session_token: Optional[str] = Query(None),
+    language: Optional[str] = None,
+    limit: Optional[int] = Query(None, ge=1, le=10),
+    proximity: Optional[str] = None,
+    bbox: Optional[str] = None,
+    country: Optional[str] = None,
+    types: Optional[str] = None,
+    poi_category: Optional[str] = None,
+    poi_category_exclusions: Optional[str] = None,
+    eta_type: Optional[str] = None,
+    navigation_profile: Optional[str] = None,
+    origin: Optional[str] = None,
+):
+    st = ensure_session_token(session_token)
+    params = {
+        "q": q,
+        "access_token": MAPBOX_TOKEN,
+        "session_token": st,
+    }
+    for k, v in {
+        "language": language,
+        "limit": limit,
+        "proximity": proximity,
+        "bbox": bbox,
+        "country": country,
+        "types": types,
+        "poi_category": poi_category,
+        "poi_category_exclusions": poi_category_exclusions,
+        "eta_type": eta_type,
+        "navigation_profile": navigation_profile,
+        "origin": origin,
+    }.items():
+        if v is not None:
+            params[k] = v
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.get(f"{BASE}/suggest", params=params)
+    if r.status_code != 200:
+        raise HTTPException(status_code=r.status_code, detail=r.text)
+
+    data = r.json()
+    data["_session_token"] = st
+    return data
+
+@router.get("/api/retrieve/{mapbox_id}")
+async def retrieve(
+    mapbox_id: str,
+    session_token: Optional[str] = Query(None),
+    language: Optional[str] = None,
+    eta_type: Optional[str] = None,
+    navigation_profile: Optional[str] = None,
+    origin: Optional[str] = None,
+):
+    if not mapbox_id:
+        raise HTTPException(400, "mapbox_id is required from a prior /suggest response (properties.mapbox_id).")
+    st = ensure_session_token(session_token)
+    params = {
+        "access_token": MAPBOX_TOKEN,
+        "session_token": st,
+    }
+    for k, v in {
+        "language": language,
+        "eta_type": eta_type,
+        "navigation_profile": navigation_profile,
+        "origin": origin,
+    }.items():
+        if v is not None:
+            params[k] = v
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.get(f"{BASE}/retrieve/{mapbox_id}", params=params)
+    if r.status_code != 200:
+        raise HTTPException(status_code=r.status_code, detail=r.text)
+
+    data = r.json()
+    data["_session_token"] = st
+    return data
