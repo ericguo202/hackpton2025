@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import LoginPage from "@/components/LoginPage";
 import Home from "@/components/Home";
 import RegisterPage from "@/components/RegisterPage";
+import ShowPage from "@/components/ShowPage";
+import EditPage from "@/components/EditPage";
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -22,6 +24,16 @@ export default function App() {
 
   if (currentPath === "/charities/new") {
     return <RegisterPage />;
+  }
+
+  // Match /charities/{id}/edit pattern
+  if (currentPath.match(/^\/charities\/\d+\/edit$/)) {
+    return <EditPage />;
+  }
+
+  // Match /charities/{id} pattern (must come after /edit route)
+  if (currentPath.match(/^\/charities\/\d+$/)) {
+    return <ShowPage />;
   }
 
   // Default to Home page
