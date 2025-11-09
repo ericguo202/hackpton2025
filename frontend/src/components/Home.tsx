@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "../styles/Home.css";
 import Navbar from "@/components/Navbar";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -72,22 +71,29 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <div className="home-container">
+      <div>
         {/* Hero Section: Zip Code Search */}
-        <section className="hero-section">
-          <div className="hero-content">
-            <h1 className="company-name">NeverHungry</h1>
-            <h2 className="hero-title">Find Local Charities</h2>
-            <p className="hero-subtitle">
+        <section className="min-h-screen flex flex-col justify-center items-center bg-[#004225] py-16 px-8 relative overflow-hidden">
+          <div className="relative z-10 max-w-[700px] w-full text-center animate-[fadeInUp_0.8s_ease-out]">
+            <h1 className="text-6xl md:text-5xl sm:text-4xl font-extrabold text-[#FFB000] mb-6 tracking-wider drop-shadow-[2px_2px_4px_rgba(0,0,0,0.3)]">
+              NeverHungry
+            </h1>
+            <h2 className="text-5xl md:text-4xl sm:text-3xl font-bold text-[#F5F5DC] mb-4 tracking-tight">
+              Find Local Charities
+            </h2>
+            <p className="text-xl md:text-lg sm:text-base text-[#FFCF9D] mb-12 font-light">
               Discover charities in your area and make a difference in your
               community
             </p>
 
-            <div className="search-container">
-              <form className="search-form" onSubmit={handleZipCodeSearch}>
+            <div className="w-full max-w-[600px] mx-auto">
+              <form
+                className="flex gap-4 bg-[#F5F5DC] p-2 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.2)] transition-all duration-300 focus-within:shadow-[0_15px_50px_rgba(255,176,0,0.3)] focus-within:-translate-y-0.5 md:flex-col md:rounded-2xl md:gap-2"
+                onSubmit={handleZipCodeSearch}
+              >
                 <input
                   type="text"
-                  className="search-input"
+                  className="flex-1 border-none outline-none py-4 px-6 text-lg rounded-full text-[#004225] bg-[#F5F5DC] placeholder:text-gray-600 md:rounded-xl md:w-full"
                   placeholder="Enter your zip code"
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
@@ -95,7 +101,7 @@ export default function Home() {
                 />
                 <button
                   type="submit"
-                  className="search-button"
+                  className="py-4 px-10 bg-[#FFB000] text-[#004225] border-none rounded-full text-lg font-semibold cursor-pointer transition-all duration-300 whitespace-nowrap hover:-translate-y-0.5 hover:shadow-[0_5px_20px_rgba(255,176,0,0.5)] hover:bg-[#FFCF9D] disabled:opacity-60 disabled:cursor-not-allowed md:rounded-xl md:w-full"
                   disabled={isSearching}
                 >
                   {isSearching ? "Searching..." : "Search"}
@@ -103,41 +109,50 @@ export default function Home() {
               </form>
 
               {searchError && (
-                <div className="error-message">{searchError}</div>
+                <div className="bg-[#F5F5DC] text-[#d32f2f] py-4 px-6 rounded-lg mt-4 font-medium border-2 border-[#FFB000]">
+                  {searchError}
+                </div>
               )}
 
               {searchResults.length > 0 && (
-                <div className="search-results">
-                  <h3 className="results-header">
+                <div className="mt-8 w-full max-w-[800px]">
+                  <h3 className="text-white text-xl mb-6 font-medium">
                     Found {searchResults.length}{" "}
                     {searchResults.length === 1 ? "charity" : "charities"}
                   </h3>
-                  <ul className="results-list">
-                    {searchResults.map((charity) => (
-                      <li key={charity.id} className="result-card">
-                        <h4 className="result-card-title">{charity.name}</h4>
-                        <p className="result-card-address">{charity.address}</p>
+                  <ul className="list-none grid gap-4">
+                    {searchResults.map((charity, index) => (
+                      <li
+                        key={charity.id}
+                        className="bg-white p-6 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] animate-[fadeInUp_0.5s_ease-out_backwards]"
+                        style={{
+                          animationDelay: `${(index + 1) * 0.1}s`,
+                        }}
+                      >
+                        <h4 className="text-2xl text-[#004225] mb-2 font-semibold">
+                          {charity.name}
+                        </h4>
+                        <p className="text-gray-600 mb-3 text-[0.95rem]">
+                          {charity.address}
+                        </p>
                         {charity.description && (
-                          <p className="result-card-description">
+                          <p className="text-gray-800 leading-relaxed mt-3">
                             {charity.description}
                           </p>
                         )}
                         {charity.contact && (
-                          <p className="result-card-description">
+                          <p className="text-gray-800 leading-relaxed mt-3">
                             <strong>Contact:</strong> {charity.contact}
                           </p>
                         )}
                         {charity.website && (
-                          <p className="result-card-description">
+                          <p className="text-gray-800 leading-relaxed mt-3">
                             <strong>Website:</strong>{" "}
                             <a
                               href={charity.website}
                               target="_blank"
                               rel="noopener noreferrer"
-                              style={{
-                                color: "#004225",
-                                textDecoration: "underline",
-                              }}
+                              className="text-[#004225] underline"
                             >
                               {charity.website}
                             </a>
@@ -153,22 +168,24 @@ export default function Home() {
         </section>
 
         {/* Charity Registration/Login Section */}
-        <section className="charity-section">
-          <div className="charity-content">
-            <h2 className="charity-title">Are you a charity?</h2>
-            <p className="charity-description">
+        <section className="min-h-[50vh] flex flex-col justify-center items-center py-20 px-8 bg-[#F5F5DC] md:py-12 md:px-6">
+          <div className="max-w-[700px] w-full text-center">
+            <h2 className="text-4xl md:text-3xl text-[#004225] mb-4 font-bold">
+              Are you a charity?
+            </h2>
+            <p className="text-lg text-[#004225] mb-10 leading-relaxed opacity-80">
               Register or log in to connect with volunteers and donors in your
               community
             </p>
-            <div className="charity-buttons">
+            <div className="flex gap-6 justify-center flex-wrap md:flex-col md:items-stretch">
               <button
-                className="charity-button charity-button-primary"
+                className="py-4 px-10 text-lg font-semibold border-none rounded-lg cursor-pointer transition-all duration-300 min-w-[180px] bg-[#FFB000] text-[#004225] shadow-[0_4px_15px_rgba(255,176,0,0.3)] hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(255,176,0,0.4)] hover:bg-[#FFCF9D] md:w-full"
                 onClick={() => (window.location.href = "/charities/new")}
               >
                 Register as Charity
               </button>
               <button
-                className="charity-button charity-button-secondary"
+                className="py-4 px-10 text-lg font-semibold rounded-lg cursor-pointer transition-all duration-300 min-w-[180px] bg-[#F5F5DC] text-[#004225] border-2 border-[#004225] hover:bg-[#004225] hover:text-[#F5F5DC] hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(0,66,37,0.3)] md:w-full"
                 onClick={() => (window.location.href = "/charities/login")}
               >
                 Log In
