@@ -6,6 +6,9 @@ project description
 
 **Libaries Used:**
 
-- Example Library
+- FastAPI
+- React (with Vite)
+- TailwindCSS
+- Mapbox
 
-**AI Disclosure:** AI was used...
+**AI Disclosure:** We used Cursor's AI Agents, Claude Sonnet 4.5, and ChatGPT 5 to write, edit, and review our code. We have reviewed all of our code and have a record of our AI use.
