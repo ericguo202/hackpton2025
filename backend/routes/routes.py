@@ -24,6 +24,7 @@ MAPBOX_GEOCODE_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/{query}.
 MAPBOX_RETRIEVE_URL = "https://api.mapbox.com/search/searchbox/v1/retrieve/{mapbox_id}"
 BASE = "https://api.mapbox.com/search/searchbox/v1"
 
+
 router = APIRouter()
 
 frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
