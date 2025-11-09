@@ -33,6 +33,11 @@ export default function IndexPage() {
   const [error, setError] = useState<string | null>(null);
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  
+  // Zip code search state
+  const [zipCode, setZipCode] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   // Fetch charities data
   useEffect(() => {
@@ -163,6 +168,83 @@ export default function IndexPage() {
     };
   }, [charities, isLoading, error]);
 
+  // Handle zip code search and map centering
+  const handleZipCodeSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate zip code (5 digits)
+    if (!/^\d{5}$/.test(zipCode)) {
+      setSearchError("Please enter a valid 5-digit zip code");
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchError(null);
+
+    try {
+      // Step 1: Use /api/suggest to search for the zip code
+      // This endpoint searches Mapbox and returns suggestions
+      const suggestResponse = await fetch(
+        `${API_BASE_URL}/api/suggest?q=${zipCode}&limit=1&types=postcode`
+      );
+
+      if (!suggestResponse.ok) {
+        throw new Error("Failed to search zip code");
+      }
+
+      const suggestData = await suggestResponse.json();
+      
+      // Check if we got any results
+      if (!suggestData.suggestions || suggestData.suggestions.length === 0) {
+        setSearchError("Zip code not found. Please try another.");
+        setIsSearching(false);
+        return;
+      }
+
+      // Get the mapbox_id from the first suggestion
+      const mapboxId = suggestData.suggestions[0].mapbox_id;
+
+      // Step 2: Use /api/retrieve to get full details including coordinates
+      // This endpoint retrieves complete information about the location
+      const retrieveResponse = await fetch(
+        `${API_BASE_URL}/api/retrieve/${mapboxId}`
+      );
+
+      if (!retrieveResponse.ok) {
+        throw new Error("Failed to retrieve location details");
+      }
+
+      const retrieveData = await retrieveResponse.json();
+      
+      // Extract coordinates from the response
+      const coordinates = retrieveData.features[0]?.geometry?.coordinates;
+      
+      if (!coordinates || coordinates.length !== 2) {
+        throw new Error("Invalid coordinates received");
+      }
+
+      const [lng, lat] = coordinates;
+
+      // Step 3: Center the map on the zip code location with smooth animation
+      if (map.current) {
+        map.current.flyTo({
+          center: [lng, lat],
+          zoom: 12, // Good zoom level for zip code area
+          duration: 2000, // 2 second smooth animation
+          essential: true // This animation is considered essential with respect to prefers-reduced-motion
+        });
+      }
+
+      setSearchError(null);
+    } catch (err) {
+      setSearchError(
+        err instanceof Error ? err.message : "Error searching zip code"
+      );
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -254,18 +336,124 @@ export default function IndexPage() {
               margin: "0 auto",
             }}
           >
-            <div
-              ref={mapContainer}
-              style={{
-                width: "100%",
-                height: "calc(100vh - 280px)",
-                minHeight: "500px",
-                borderRadius: "8px",
-                overflow: "hidden",
-                border: "2px solid #004225",
-                boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-              }}
-            />
+            {/* Map wrapper with relative positioning for overlay */}
+            <div style={{ position: "relative" }}>
+              {/* The actual map */}
+              <div
+                ref={mapContainer}
+                style={{
+                  width: "100%",
+                  height: "calc(100vh - 280px)",
+                  minHeight: "500px",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  border: "2px solid #004225",
+                  boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+                }}
+              />
+
+              {/* Zip Code Search Overlay */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "1rem",
+                  left: "1rem",
+                  zIndex: 1000,
+                  backgroundColor: "white",
+                  padding: "1rem",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+                  border: "2px solid #004225",
+                  minWidth: "280px",
+                }}
+              >
+                <form onSubmit={handleZipCodeSearch}>
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <label
+                      htmlFor="zipcode-search"
+                      style={{
+                        display: "block",
+                        fontSize: "0.9rem",
+                        fontWeight: "600",
+                        color: "#004225",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      Search by Zip Code
+                    </label>
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <input
+                        id="zipcode-search"
+                        type="text"
+                        value={zipCode}
+                        onChange={(e) => setZipCode(e.target.value)}
+                        placeholder="Enter zip code"
+                        maxLength={5}
+                        style={{
+                          flex: 1,
+                          padding: "0.5rem",
+                          border: "2px solid #004225",
+                          borderRadius: "6px",
+                          fontSize: "0.9rem",
+                          outline: "none",
+                        }}
+                        onFocus={(e) =>
+                          (e.currentTarget.style.borderColor = "#FFB000")
+                        }
+                        onBlur={(e) =>
+                          (e.currentTarget.style.borderColor = "#004225")
+                        }
+                      />
+                      <button
+                        type="submit"
+                        disabled={isSearching}
+                        style={{
+                          padding: "0.5rem 1rem",
+                          backgroundColor: isSearching ? "#999" : "#FFB000",
+                          color: "#004225",
+                          border: "none",
+                          borderRadius: "6px",
+                          fontSize: "0.9rem",
+                          fontWeight: "600",
+                          cursor: isSearching ? "not-allowed" : "pointer",
+                          whiteSpace: "nowrap",
+                          transition: "background 0.2s",
+                        }}
+                        onMouseOver={(e) => {
+                          if (!isSearching) {
+                            e.currentTarget.style.backgroundColor = "#FFCF9D";
+                          }
+                        }}
+                        onMouseOut={(e) => {
+                          if (!isSearching) {
+                            e.currentTarget.style.backgroundColor = "#FFB000";
+                          }
+                        }}
+                      >
+                        {isSearching ? "Searching..." : "Go"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Search Error Message */}
+                  {searchError && (
+                    <div
+                      style={{
+                        marginTop: "0.5rem",
+                        padding: "0.5rem",
+                        backgroundColor: "#fee",
+                        border: "1px solid #fcc",
+                        borderRadius: "4px",
+                        fontSize: "0.85rem",
+                        color: "#c33",
+                      }}
+                    >
+                      {searchError}
+                    </div>
+                  )}
+                </form>
+              </div>
+            </div>
           </div>
         )}
       </div>
