@@ -260,6 +260,11 @@ export default function RegisterPage() {
           setError(
             errorData.detail || "Invalid form data. Please check your inputs."
           );
+        } else if (response.status === 409) {
+          // Handle duplicate username
+          setError(
+            errorData.detail || "Username is already taken. Please choose a different username."
+          );
         } else {
           setError("Registration failed. Please try again.");
         }

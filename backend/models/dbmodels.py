@@ -3,7 +3,7 @@ from sqlmodel import SQLModel, Field, Column, Boolean, text, JSON
 
 class Charity(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    username: str = Field(min_length=3, max_length=30)
+    username: str = Field(min_length=3, max_length=30, unique=True, index=True)
     password: str = Field(min_length=6)
     name: str = Field(min_length=1)
     address: str = Field(min_length=5)

@@ -52,13 +52,38 @@ async def charities(db: SessionDep, r: RedisDep):
 
 @router.post("/charities", response_model=CharityRead)
 async def new_charity(data: CharityCreate, db: SessionDep, r: RedisDep):
+    # Check if username already exists
+    stmt = select(Charity).where(Charity.username == data.username)
+    results = await db.execute(stmt)
+    existing_charity = results.scalars().first()
+    
+    if existing_charity:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Username '{data.username}' is already taken. Please choose a different username."
+        )
+    
     data.password = hash_password(data.password)
     feature = await geocode_address_to_features(address=data.address)
     payload = data.model_dump()
     charity = Charity(**payload,geojson=feature)
     db.add(charity)
-    await db.commit()
-    await db.refresh(charity)
+    
+    try:
+        await db.commit()
+        await db.refresh(charity)
+    except Exception as e:
+        await db.rollback()
+        # Handle database constraint violations (in case of race conditions)
+        if "unique constraint" in str(e).lower() or "duplicate" in str(e).lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Username '{data.username}' is already taken. Please choose a different username."
+            )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create charity account. Please try again."
+        )
 
     cur_ver = await _get_ver(r)
     await r.delete(f"charities:all:v{cur_ver}")
