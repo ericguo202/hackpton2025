@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, useRef, type FormEvent } from "react";
 import Navbar from "@/components/Navbar";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -11,6 +11,13 @@ interface RegisterFormData {
   description: string;
   website: string;
   contact: string;
+}
+
+interface AddressSuggestion {
+  mapbox_id: string;
+  name: string;
+  full_address?: string;
+  place_formatted?: string;
 }
 
 export default function RegisterPage() {
@@ -26,6 +33,165 @@ export default function RegisterPage() {
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Address autocomplete state
+  const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [sessionToken, setSessionToken] = useState<string>("");
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const addressInputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Debounce timer
+  const debounceTimerRef = useRef<number | null>(null);
+
+  // Fetch address suggestions from backend
+  const fetchAddressSuggestions = async (query: string) => {
+    if (query.length < 3) {
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setIsLoadingSuggestions(true);
+    try {
+      const params = new URLSearchParams({
+        q: query,
+        limit: "5",
+      });
+
+      if (sessionToken) {
+        params.append("session_token", sessionToken);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/suggest?${params}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Failed to fetch address suggestions");
+        setAddressSuggestions([]);
+        return;
+      }
+
+      const data = await response.json();
+      
+      // Store the session token returned by the backend
+      if (data._session_token) {
+        setSessionToken(data._session_token);
+      }
+
+      const suggestions: AddressSuggestion[] = data.suggestions || [];
+      setAddressSuggestions(suggestions);
+      setShowSuggestions(suggestions.length > 0);
+    } catch (err) {
+      console.error("Error fetching address suggestions:", err);
+      setAddressSuggestions([]);
+    } finally {
+      setIsLoadingSuggestions(false);
+    }
+  };
+
+  // Handle address input change with debouncing
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      address: value,
+    }));
+
+    if (error) setError(null);
+
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set new timer
+    debounceTimerRef.current = setTimeout(() => {
+      fetchAddressSuggestions(value);
+    }, 300);
+  };
+
+  // Handle suggestion selection
+  const handleSuggestionSelect = async (suggestion: AddressSuggestion) => {
+    setIsLoadingSuggestions(true);
+    try {
+      const params = new URLSearchParams({
+        session_token: sessionToken,
+      });
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/retrieve/${suggestion.mapbox_id}?${params}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Failed to retrieve address details");
+        return;
+      }
+
+      const data = await response.json();
+      const feature = data.features?.[0];
+
+      if (feature) {
+        // Use the full formatted address
+        const fullAddress = 
+          feature.properties?.full_address || 
+          feature.properties?.place_formatted || 
+          suggestion.full_address ||
+          suggestion.place_formatted ||
+          suggestion.name;
+
+        setFormData((prev) => ({
+          ...prev,
+          address: fullAddress,
+        }));
+      }
+    } catch (err) {
+      console.error("Error retrieving address details:", err);
+    } finally {
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+      setIsLoadingSuggestions(false);
+    }
+  };
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node) &&
+        addressInputRef.current &&
+        !addressInputRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -183,7 +349,8 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <div>
+              {/* Address field with autocomplete */}
+              <div className="relative">
                 <label
                   htmlFor="address"
                   className="block text-sm font-medium text-[#004225] mb-1"
@@ -191,16 +358,74 @@ export default function RegisterPage() {
                   Address <span className="text-red-500">*</span>
                 </label>
                 <input
+                  ref={addressInputRef}
                   type="text"
                   id="address"
                   name="address"
                   value={formData.address}
-                  onChange={handleChange}
-                  placeholder="Street, City, State ZIP"
+                  onChange={handleAddressChange}
+                  onFocus={() => {
+                    if (addressSuggestions.length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                  placeholder="Start typing your address..."
                   required
                   minLength={5}
+                  autoComplete="off"
                   className="w-full px-4 py-2 border-2 border-[#004225] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFB000] focus:border-transparent text-[#004225] bg-[#F5F5DC]"
                 />
+
+                {/* Suggestions dropdown */}
+                {showSuggestions && addressSuggestions.length > 0 && (
+                  <div
+                    ref={suggestionsRef}
+                    className="absolute z-10 w-full mt-1 bg-white border-2 border-[#004225] rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                  >
+                    {addressSuggestions.map((suggestion, index) => (
+                      <div
+                        key={suggestion.mapbox_id || index}
+                        onClick={() => handleSuggestionSelect(suggestion)}
+                        className="px-4 py-3 hover:bg-[#F5F5DC] cursor-pointer border-b border-[#004225] border-opacity-20 last:border-b-0 transition-colors"
+                      >
+                        <div className="text-[#004225] font-medium">
+                          {suggestion.name}
+                        </div>
+                        {(suggestion.full_address || suggestion.place_formatted) && (
+                          <div className="text-[#004225] text-sm opacity-70 mt-1">
+                            {suggestion.full_address || suggestion.place_formatted}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Loading indicator */}
+                {isLoadingSuggestions && (
+                  <div className="absolute right-3 top-10 text-[#FFB000]">
+                    <svg
+                      className="animate-spin h-5 w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </div>
+                )}
               </div>
 
               <div>
