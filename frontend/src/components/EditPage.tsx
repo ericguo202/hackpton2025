@@ -122,17 +122,8 @@ export default function EditPage() {
       return;
     }
 
-    if (formData.description.length === 0) {
-      setError("Description is required");
-      return;
-    }
-
-    if (formData.website.length === 0) {
-      setError("Website is required");
-      return;
-    }
-
-    if (!urlRegex.test(formData.website)) {
+    // Validate website only if provided
+    if (formData.website.length > 0 && !urlRegex.test(formData.website)) {
       setError(
         "Website must be a valid URL (starting with http:// or https://)"
       );
@@ -323,17 +314,16 @@ export default function EditPage() {
                   htmlFor="description"
                   className="block text-sm font-medium text-[#004225] mb-1"
                 >
-                  Description <span className="text-red-500">*</span>
+                  Description
                 </label>
                 <textarea
                   id="description"
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  required
                   rows={4}
                   className="w-full px-4 py-2 border-2 border-[#004225] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFB000] focus:border-transparent text-[#004225] bg-[#F5F5DC] resize-none"
-                  placeholder="Tell us about your charity"
+                  placeholder="Tell us about your charity (optional)"
                 />
               </div>
 
@@ -343,7 +333,7 @@ export default function EditPage() {
                   htmlFor="website"
                   className="block text-sm font-medium text-[#004225] mb-1"
                 >
-                  Website <span className="text-red-500">*</span>
+                  Website
                 </label>
                 <input
                   type="url"
@@ -351,8 +341,7 @@ export default function EditPage() {
                   name="website"
                   value={formData.website}
                   onChange={handleChange}
-                  placeholder="https://example.com"
-                  required
+                  placeholder="https://example.com (optional)"
                   className="w-full px-4 py-2 border-2 border-[#004225] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFB000] focus:border-transparent text-[#004225] bg-[#F5F5DC]"
                 />
               </div>
