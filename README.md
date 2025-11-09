@@ -4,7 +4,7 @@ project description
 
 # Acknowledgements
 
-**Libaries Used:**
+**Libraries Used:**
 
 - FastAPI
 - React (with Vite)
