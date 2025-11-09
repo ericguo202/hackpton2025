@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 interface Charity {
   id: number;
@@ -24,8 +24,8 @@ export default function Navbar() {
     const checkAuth = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/charities/me`, {
-          method: 'GET',
-          credentials: 'include', // Send cookies
+          method: "GET",
+          credentials: "include", // Send cookies
         });
 
         if (response.ok) {
@@ -35,7 +35,7 @@ export default function Navbar() {
           setCharity(null);
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error("Auth check failed:", error);
         setCharity(null);
       } finally {
         setIsLoading(false);
@@ -48,52 +48,41 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       await fetch(`${API_BASE_URL}/charities/logout`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
       });
       setCharity(null);
-      window.location.href = '/';
+      window.location.href = "/";
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
   return (
-    <nav style={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      alignItems: 'center',
-      padding: '1rem 2rem',
-      backgroundColor: '#f8f9fa',
-      borderBottom: '1px solid #dee2e6'
-    }}>
+    <nav className="flex justify-between items-center py-4 px-8 bg-[#F5F5DC] border-b-2 border-[#004225]">
       {/* Website Name */}
-      <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-        <a href="/" style={{ textDecoration: 'none', color: '#333' }}>
+      <div className="text-2xl font-bold">
+        <a
+          href="/"
+          className="no-underline text-[#004225] hover:text-[#FFB000] transition-colors duration-300"
+        >
           NeverHungry.org
         </a>
       </div>
 
       {/* Navigation Links */}
-      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+      <div className="flex gap-6 items-center">
         {isLoading ? (
-          <span>Loading...</span>
+          <span className="text-[#004225]">Loading...</span>
         ) : charity ? (
           // Logged in state
           <>
-            <span style={{ fontWeight: '500' }}>
+            <span className="font-medium text-[#004225]">
               Welcome, {charity.name}
             </span>
-            <button 
+            <button
               onClick={handleLogout}
-              style={{ 
-                cursor: 'pointer',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#dc3545',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px'
-              }}
+              className="cursor-pointer py-2 px-4 bg-[#FFB000] text-[#004225] border-none rounded-lg font-semibold transition-all duration-300 hover:bg-[#FFCF9D] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(255,176,0,0.3)]"
             >
               Log Out
             </button>
@@ -101,10 +90,16 @@ export default function Navbar() {
         ) : (
           // Not logged in state
           <>
-            <a href="/charities/login" style={{ textDecoration: 'none', color: '#007bff' }}>
+            <a
+              href="/charities/login"
+              className="no-underline text-[#004225] font-medium hover:text-[#FFB000] transition-colors duration-300"
+            >
               Login
             </a>
-            <a href="/charities/new" style={{ textDecoration: 'none', color: '#007bff' }}>
+            <a
+              href="/charities/new"
+              className="no-underline text-[#004225] font-medium hover:text-[#FFB000] transition-colors duration-300"
+            >
               Register Your Charity
             </a>
           </>
