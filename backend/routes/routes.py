@@ -149,6 +149,14 @@ async def serve_index_page():
         return FileResponse(str(index_path))
     raise HTTPException(status_code=404, detail="Frontend not built. Run 'npm run build' in frontend directory.")
 
+@router.get("/volunteer-dashboard")
+async def serve_volunteer_dashboard():
+    """Serve the React app for the volunteer dashboard page"""
+    index_path = frontend_dist / "index.html"
+    if index_path.exists():
+        return FileResponse(str(index_path))
+    raise HTTPException(status_code=404, detail="Frontend not built. Run 'npm run build' in frontend directory.")
+
 @router.post("/charities/logout")
 async def charity_logout(response: Response, request: Request, r: RedisDep):
     sid = request.cookies.get("sid")
