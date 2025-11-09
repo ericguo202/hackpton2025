@@ -141,6 +141,14 @@ async def serve_registration_page():
         return FileResponse(str(index_path))
     raise HTTPException(status_code=404, detail="Frontend not built. Run 'npm run build' in frontend directory.")
 
+@router.get("/charities/index")
+async def serve_index_page():
+    """Serve the React app for the charities map index page"""
+    index_path = frontend_dist / "index.html"
+    if index_path.exists():
+        return FileResponse(str(index_path))
+    raise HTTPException(status_code=404, detail="Frontend not built. Run 'npm run build' in frontend directory.")
+
 @router.post("/charities/logout")
 async def charity_logout(response: Response, request: Request, r: RedisDep):
     sid = request.cookies.get("sid")
@@ -150,6 +158,14 @@ async def charity_logout(response: Response, request: Request, r: RedisDep):
     await r.delete(f"session:{sid}")
     response.delete_cookie(key="sid")
     return {"ok": True}
+
+@router.get("/charities/{id}/edit")
+async def serve_edit_page(id: int):
+    """Serve the React app for the edit page"""
+    index_path = frontend_dist / "index.html"
+    if index_path.exists():
+        return FileResponse(str(index_path))
+    raise HTTPException(status_code=404, detail="Frontend not built. Run 'npm run build' in frontend directory.")
 
 @router.get("/charities/{id}", response_model=CharityRead, name="get_charity")
 async def get_charity(id: int, db: SessionDep, r: RedisDep):
