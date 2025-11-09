@@ -30,8 +30,8 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Use relative URL since FastAPI serves the frontend
-      const apiUrl = import.meta.env.VITE_API_URL || '';
+      // Use API URL from environment or default to localhost
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiUrl}/charities/login`, {
         method: 'POST',
         headers: {
