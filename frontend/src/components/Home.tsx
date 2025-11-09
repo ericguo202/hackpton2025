@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -14,6 +14,7 @@ interface Charity {
   needs_volunteers: boolean;
   needs_donations: boolean;
   is_approved: boolean;
+  geojson?: any;
 }
 
 export default function Home() {
@@ -21,6 +22,34 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<Charity[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
+  const [currentCharity, setCurrentCharity] = useState<Charity | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check if charity is logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/charities/me`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentCharity(data);
+        } else {
+          setCurrentCharity(null);
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        setCurrentCharity(null);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const extractZipCode = (address: string): string | null => {
     // Match 5-digit or 5+4 digit zip codes
@@ -68,6 +97,112 @@ export default function Home() {
     }
   };
 
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center bg-[#F5F5DC]">
+          <p className="text-xl text-[#004225]">Loading...</p>
+        </div>
+      </>
+    );
+  }
+
+  // Render charity dashboard if logged in
+  if (currentCharity) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-[#F5F5DC] py-16 px-8">
+          <div className="max-w-[900px] mx-auto">
+            {/* Welcome Section */}
+            <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+              <h1 className="text-5xl font-bold text-[#004225] mb-4">
+                Welcome, {currentCharity.name}!
+              </h1>
+              <p className="text-xl text-[#004225] opacity-80 mb-6">
+                Need volunteers or donations? Keep your charity information up to date.
+              </p>
+              <a
+                href={`/charities/${currentCharity.id}/edit`}
+                className="inline-block py-3 px-6 bg-[#FFB000] text-[#004225] rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-[#FFCF9D] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(255,176,0,0.3)] no-underline"
+              >
+                Configure Charity Information
+              </a>
+            </div>
+
+            {/* Charity Info Summary */}
+            <div className="bg-white rounded-xl shadow-lg p-8">
+              <h2 className="text-3xl font-bold text-[#004225] mb-6">
+                Your Charity Profile
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-[#004225] mb-1">Address</h3>
+                  <p className="text-gray-700">{currentCharity.address}</p>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-[#004225] mb-1">Description</h3>
+                  <p className="text-gray-700">{currentCharity.description || "No description provided"}</p>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-[#004225] mb-1">Contact</h3>
+                  <p className="text-gray-700">{currentCharity.contact}</p>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-[#004225] mb-1">Website</h3>
+                  <a 
+                    href={currentCharity.website} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[#FFB000] hover:text-[#FFCF9D] underline"
+                  >
+                    {currentCharity.website}
+                  </a>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-[#004225] mb-2">Current Needs</h3>
+                  <div className="flex gap-3 flex-wrap">
+                    <span className={`py-2 px-4 rounded-lg font-medium ${
+                      currentCharity.needs_volunteers 
+                        ? "bg-green-100 text-green-800 border-2 border-green-500" 
+                        : "bg-gray-100 text-gray-600 border-2 border-gray-300"
+                    }`}>
+                      {currentCharity.needs_volunteers ? "✓ Needs Volunteers" : "Not Seeking Volunteers"}
+                    </span>
+                    <span className={`py-2 px-4 rounded-lg font-medium ${
+                      currentCharity.needs_donations 
+                        ? "bg-green-100 text-green-800 border-2 border-green-500" 
+                        : "bg-gray-100 text-gray-600 border-2 border-gray-300"
+                    }`}>
+                      {currentCharity.needs_donations ? "✓ Needs Donations" : "Not Seeking Donations"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <a
+                    href={`/charities/${currentCharity.id}`}
+                    className="inline-block py-2 px-5 bg-[#004225] text-white rounded-lg font-medium transition-all duration-300 hover:bg-[#003319] no-underline"
+                  >
+                    View Public Profile
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Render public home page if not logged in
   return (
     <>
       <Navbar />

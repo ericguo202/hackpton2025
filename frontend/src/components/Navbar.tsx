@@ -77,9 +77,12 @@ export default function Navbar() {
         ) : charity ? (
           // Logged in state
           <>
-            <span className="font-medium text-[#004225]">
+            <a
+              href={`/charities/${charity.id}`}
+              className="font-medium text-[#004225] no-underline hover:text-[#FFB000] transition-colors duration-300"
+            >
               Welcome, {charity.name}
-            </span>
+            </a>
             <button
               onClick={handleLogout}
               className="cursor-pointer py-2 px-4 bg-[#FFB000] text-[#004225] border-none rounded-lg font-semibold transition-all duration-300 hover:bg-[#FFCF9D] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(255,176,0,0.3)]"
