@@ -1,5 +1,5 @@
-from typing import Optional
-from sqlmodel import SQLModel, Field, Column, Boolean, text
+from typing import Optional, Dict, Any
+from sqlmodel import SQLModel, Field, Column, Boolean, text, JSON  
 
 class Charity(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -18,4 +18,7 @@ class Charity(SQLModel, table=True):
     )
     is_approved: bool = Field(
         sa_column=Column(Boolean, nullable=False, server_default=text("false"))
+    )
+    geojson: Dict[str, Any] = Field(
+        sa_column=Column(JSON, nullable=False, comment="GeoJSON Feature(Point), derived from address")
     )
