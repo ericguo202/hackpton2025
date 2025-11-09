@@ -15,7 +15,6 @@ class CharityLogin(SQLModel):
 
 class CharityEdit(SQLModel): 
     name: str = Field(min_length=1)
-    address: str = Field(min_length=5)
     description: str = Field(default="")
     website: str = Field(default="")
     contact: str = Field(min_length=5)

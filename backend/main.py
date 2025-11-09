@@ -33,25 +33,35 @@ async def lifespan(app: FastAPI):
                 username="david123",
                 password="david123", 
                 name="The david foundation",
-                address="67 street",
+                address="1600 Pennsylvania Ave NW, Washington, DC 20500",
                 description="awesome charity",
                 website="coolwebsite.com",
                 contact="david123@gmail.com",
                 needs_donations=True,
                 needs_volunteers=False,
                 is_approved=True,
+                geojson={
+        "type": "Feature",
+        "geometry": {"type": "Point", "coordinates": [-77.03653, 38.897676]},
+        "properties": {"label": "1600 Pennsylvania Ave NW, Washington, DC 20500", "provider": "seed"}
+    },
             )
 
             e2 = Charity(
                 username="chungus",
                 password="bignuts67",  
                 name="Hawktuah simulator",
-                address="65 Glendale Ave",
+                address="1 Apple Park Way, Cupertino, CA 95014",
                 description="best charity",
                 website="hi@gmail.com",
                 contact="fattymatt@gmail.com",
                 needs_donations=True,
                 needs_volunteers=True,
+                 geojson={
+        "type": "Feature",
+        "geometry": {"type": "Point", "coordinates": [-122.00902, 37.33465]},
+        "properties": {"label": "1 Apple Park Way, Cupertino, CA 95014", "provider": "seed"}
+    },
             )
 
             session.add_all([e1, e2])
