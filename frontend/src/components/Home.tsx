@@ -114,89 +114,93 @@ export default function Home() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-[#F5F5DC] py-16 px-8">
-          <div className="max-w-[900px] mx-auto">
-            {/* Welcome Section */}
-            <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-              <h1 className="text-5xl font-bold text-[#004225] mb-4">
+        <div>
+          {/* Welcome Banner Section - Similar to public hero */}
+          <section className="min-h-[60vh] flex flex-col justify-center items-center bg-[#004225] py-16 px-8 relative overflow-hidden">
+            <div className="relative z-10 max-w-[900px] w-full text-center">
+              <h1 className="text-6xl md:text-5xl sm:text-4xl font-extrabold text-[#FFB000] mb-6 tracking-wider drop-shadow-[2px_2px_4px_rgba(0,0,0,0.3)]">
                 Welcome, {currentCharity.name}!
               </h1>
-              <p className="text-xl text-[#004225] opacity-80 mb-6">
+              <p className="text-2xl md:text-xl text-[#F5F5DC] mb-8 font-light">
                 Need volunteers or donations? Keep your charity information up to date.
               </p>
               <a
                 href={`/charities/${currentCharity.id}/edit`}
-                className="inline-block py-3 px-6 bg-[#FFB000] text-[#004225] rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-[#FFCF9D] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(255,176,0,0.3)] no-underline"
+                className="inline-block py-4 px-8 bg-[#FFB000] text-[#004225] rounded-full text-xl font-semibold transition-all duration-300 hover:bg-[#FFCF9D] hover:-translate-y-0.5 hover:shadow-[0_5px_20px_rgba(255,176,0,0.5)] no-underline"
               >
                 Configure Charity Information
               </a>
             </div>
+          </section>
 
-            {/* Charity Info Summary */}
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <h2 className="text-3xl font-bold text-[#004225] mb-6">
-                Your Charity Profile
-              </h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-[#004225] mb-1">Address</h3>
-                  <p className="text-gray-700">{currentCharity.address}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-[#004225] mb-1">Description</h3>
-                  <p className="text-gray-700">{currentCharity.description || "No description provided"}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-[#004225] mb-1">Contact</h3>
-                  <p className="text-gray-700">{currentCharity.contact}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-[#004225] mb-1">Website</h3>
-                  <a 
-                    href={currentCharity.website} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-[#FFB000] hover:text-[#FFCF9D] underline"
-                  >
-                    {currentCharity.website}
-                  </a>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-[#004225] mb-2">Current Needs</h3>
-                  <div className="flex gap-3 flex-wrap">
-                    <span className={`py-2 px-4 rounded-lg font-medium ${
-                      currentCharity.needs_volunteers 
-                        ? "bg-green-100 text-green-800 border-2 border-green-500" 
-                        : "bg-gray-100 text-gray-600 border-2 border-gray-300"
-                    }`}>
-                      {currentCharity.needs_volunteers ? "✓ Needs Volunteers" : "Not Seeking Volunteers"}
-                    </span>
-                    <span className={`py-2 px-4 rounded-lg font-medium ${
-                      currentCharity.needs_donations 
-                        ? "bg-green-100 text-green-800 border-2 border-green-500" 
-                        : "bg-gray-100 text-gray-600 border-2 border-gray-300"
-                    }`}>
-                      {currentCharity.needs_donations ? "✓ Needs Donations" : "Not Seeking Donations"}
-                    </span>
+          {/* Charity Info Summary */}
+          <section className="py-16 px-8 bg-[#F5F5DC]">
+            <div className="max-w-[900px] mx-auto">
+              <div className="bg-white rounded-xl shadow-lg p-8">
+                <h2 className="text-3xl font-bold text-[#004225] mb-6">
+                  Your Charity Profile
+                </h2>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#004225] mb-1">Address</h3>
+                    <p className="text-gray-700">{currentCharity.address}</p>
                   </div>
-                </div>
 
-                <div className="pt-4">
-                  <a
-                    href={`/charities/${currentCharity.id}`}
-                    className="inline-block py-2 px-5 bg-[#004225] text-white rounded-lg font-medium transition-all duration-300 hover:bg-[#003319] no-underline"
-                  >
-                    View Public Profile
-                  </a>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#004225] mb-1">Description</h3>
+                    <p className="text-gray-700">{currentCharity.description || "No description provided"}</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#004225] mb-1">Contact</h3>
+                    <p className="text-gray-700">{currentCharity.contact}</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#004225] mb-1">Website</h3>
+                    <a 
+                      href={currentCharity.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-[#FFB000] hover:text-[#FFCF9D] underline"
+                    >
+                      {currentCharity.website}
+                    </a>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#004225] mb-2">Current Needs</h3>
+                    <div className="flex gap-3 flex-wrap">
+                      <span className={`py-2 px-4 rounded-lg font-medium ${
+                        currentCharity.needs_volunteers 
+                          ? "bg-green-100 text-green-800 border-2 border-green-500" 
+                          : "bg-gray-100 text-gray-600 border-2 border-gray-300"
+                      }`}>
+                        {currentCharity.needs_volunteers ? "✓ Needs Volunteers" : "Not Seeking Volunteers"}
+                      </span>
+                      <span className={`py-2 px-4 rounded-lg font-medium ${
+                        currentCharity.needs_donations 
+                          ? "bg-green-100 text-green-800 border-2 border-green-500" 
+                          : "bg-gray-100 text-gray-600 border-2 border-gray-300"
+                      }`}>
+                        {currentCharity.needs_donations ? "✓ Needs Donations" : "Not Seeking Donations"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-4">
+                    <a
+                      href={`/charities/${currentCharity.id}`}
+                      className="inline-block py-2 px-5 bg-[#004225] text-white rounded-lg font-medium transition-all duration-300 hover:bg-[#003319] no-underline"
+                    >
+                      View Public Profile
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
         </div>
       </>
     );
