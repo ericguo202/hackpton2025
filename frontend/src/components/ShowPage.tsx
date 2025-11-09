@@ -18,12 +18,41 @@ interface Charity {
 
 export default function ShowPage() {
   const [charity, setCharity] = useState<Charity | null>(null);
+  const [currentUser, setCurrentUser] = useState<Charity | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Extract charity ID from URL path (e.g., /charities/1)
   const charityId = window.location.pathname.split("/").pop();
 
+  // Check if user is logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/charities/me`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentUser(data);
+        } else {
+          setCurrentUser(null);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        setCurrentUser(null);
+      } finally {
+        setIsLoadingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  // Fetch charity data
   useEffect(() => {
     const fetchCharity = async () => {
       if (!charityId || isNaN(Number(charityId))) {
@@ -58,6 +87,9 @@ export default function ShowPage() {
 
     fetchCharity();
   }, [charityId]);
+
+  // Check if the logged-in user owns this charity profile
+  const isOwner = currentUser && charity && currentUser.id === charity.id;
 
   return (
     <>
@@ -107,17 +139,47 @@ export default function ShowPage() {
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             padding: "2rem"
           }}>
-            {/* Charity Name */}
-            <h1 style={{
-              fontSize: "2.5rem",
-              fontWeight: "bold",
-              color: "#333",
-              marginBottom: "1rem",
-              borderBottom: "3px solid #667eea",
-              paddingBottom: "0.5rem"
+            {/* Header with Title and Edit Button */}
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              marginBottom: "1rem"
             }}>
-              {charity.name}
-            </h1>
+              {/* Charity Name */}
+              <h1 style={{
+                fontSize: "2.5rem",
+                fontWeight: "bold",
+                color: "#333",
+                borderBottom: "3px solid #667eea",
+                paddingBottom: "0.5rem",
+                flex: 1
+              }}>
+                {charity.name}
+              </h1>
+
+              {/* Edit Button - Only show if user owns this charity */}
+              {!isLoadingAuth && isOwner && (
+                <a
+                  href={`/charities/${charity.id}/edit`}
+                  style={{
+                    display: "inline-block",
+                    padding: "0.75rem 1.5rem",
+                    backgroundColor: "#667eea",
+                    color: "white",
+                    textDecoration: "none",
+                    borderRadius: "8px",
+                    fontWeight: "600",
+                    marginLeft: "1rem",
+                    transition: "background-color 0.2s"
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#5568d3"}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#667eea"}
+                >
+                  Edit Profile
+                </a>
+              )}
+            </div>
 
             {/* Address Section */}
             <div style={{ marginBottom: "1.5rem" }}>
@@ -127,7 +189,7 @@ export default function ShowPage() {
                 color: "#555",
                 marginBottom: "0.5rem"
               }}>
-                📍 Address
+                Address
               </h3>
               <p style={{ fontSize: "1rem", color: "#666", lineHeight: "1.6" }}>
                 {charity.address}
@@ -187,7 +249,7 @@ export default function ShowPage() {
                   color: "#555",
                   marginBottom: "0.5rem"
                 }}>
-                  📧 Contact
+                  Contact
                 </h3>
                 <p style={{ fontSize: "1rem", color: "#666" }}>
                   {charity.contact}
@@ -266,7 +328,7 @@ export default function ShowPage() {
               </button>
             </div>
           </div>
-        )}
+        )} 
       </div>
     </>
   );

@@ -155,12 +155,6 @@ async def get_charity(id: int, db: SessionDep, r: RedisDep):
     await r.setex(key, 180, json.dumps(payload))
     return payload
 
-
-@router.get("/charities/{id}/edit")
-def charity_edit_page(id: int):
-    return {"status": "ok"}
-
-
 @router.patch("/charities/{id}/edit", response_model=CharityRead)
 async def charity_edits(
     id: int,
