@@ -131,7 +131,7 @@ async def charity_login(
         value=sid,
         httponly=True,
         secure=True,  
-        samesite="lax",
+        samesite="none",
         max_age=3600,
         path="/",
     )
