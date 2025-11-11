@@ -17,9 +17,9 @@ from models.dbmodels import Charity
 from sqlalchemy.ext.asyncio import AsyncSession
 import bcrypt
 
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
-REDIS_DB   = int(os.getenv("REDIS_DB", "0"))
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "*")
 
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -560,9 +560,7 @@ async def lifespan(app: FastAPI):
             session.add_all(charities)
             await session.commit()
 
-    app.state.redis = redis.Redis(
-        host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True
-    )
+    app.state.redis = redis.from_url(REDIS_URL, decode_respones=True)
 
     try:
         yield
@@ -582,6 +580,7 @@ app.add_middleware(GZipMiddleware, minimum_size=500)
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=[FRONTEND_ORIGIN] if FRONTEND_ORIGIN != "*" else ["*"],
     allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
