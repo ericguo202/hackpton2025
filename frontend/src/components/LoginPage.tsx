@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import Navbar from "@/components/Navbar";
+import { API_BASE_URL } from "@/lib/config";
 
 interface LoginFormData {
   username: string;
@@ -30,9 +31,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Use API URL from environment or default to localhost
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/charities/login`, {
+  const response = await fetch(`${API_BASE_URL}/charities/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

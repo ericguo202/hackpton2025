@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, type FormEvent } from "react";
 import Navbar from "@/components/Navbar";
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { API_BASE_URL } from "@/lib/config";
 
 interface RegisterFormData {
   username: string;

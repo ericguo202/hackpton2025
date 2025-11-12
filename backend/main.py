@@ -560,7 +560,9 @@ async def lifespan(app: FastAPI):
             session.add_all(charities)
             await session.commit()
 
-    app.state.redis = redis.from_url(REDIS_URL, decode_respones=True)
+    # Create redis client and decode responses to strings
+    # Note: decode_respones was a typo that prevented proper decoding
+    app.state.redis = redis.from_url(REDIS_URL, decode_responses=True)
 
     try:
         yield
@@ -578,10 +580,22 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
+# Parse FRONTEND_ORIGIN which may be a single origin or a comma-separated list.
+# When a wildcard ("*") is provided, we must disable credentials because
+# Access-Control-Allow-Origin: * is not allowed with Access-Control-Allow-Credentials: true.
+_raw_frontend_origins = os.getenv("FRONTEND_ORIGIN", "*")
+if _raw_frontend_origins.strip() == "*":
+    _allow_origins = ["*"]
+else:
+    _allow_origins = [o.strip() for o in _raw_frontend_origins.split(",") if o.strip()]
+
+# If the origins list is exactly ["*"], credentials are not allowed by spec. Otherwise allow credentials.
+_allow_credentials = not (len(_allow_origins) == 1 and _allow_origins[0] == "*")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_ORIGIN] if FRONTEND_ORIGIN != "*" else ["*"],
-    allow_credentials=True,
+    allow_origins=_allow_origins,
+    allow_credentials=_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
