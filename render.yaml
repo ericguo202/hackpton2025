@@ -1,0 +1,67 @@
+# render.yaml (place in repo root)
+
+services:
+  # --- Backend: FastAPI ---
+  - type: web
+    name: hackpton-backend
+    runtime: python
+    repo: https://github.com/ericguo202/hackpton2025
+    rootDir: backend
+    branch: main
+    region: oregon
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    # run behind Render's proxy; bind to $PORT
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --proxy-headers
+    autoDeployTrigger: commit
+    healthCheckPath: /health
+    preDeployCommand: alembic upgrade head
+    envVars:
+      # generate a strong secret once; Render stores it
+      - key: SECRET_KEY
+        generateValue: true
+      # lock CORS to your frontend origin(s), comma-separated if more than one
+      - key: ALLOWED_ORIGINS
+        value: https://hackpton-frontend.onrender.com
+      # Postgres URL from the managed DB defined below
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hackpton-db
+          property: connectionString
+      # Redis URL from Key Value service below
+      - key: REDIS_URL
+        fromService:
+          name: hackpton-redis
+          type: keyvalue
+          property: connectionString
+
+  # --- Frontend: Vite static site ---
+  - type: web
+    name: hackpton-frontend
+    runtime: static
+    repo: https://github.com/ericguo202/hackpton2025
+    rootDir: frontend
+    branch: main
+    autoDeployTrigger: commit
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://hackpton-backend.onrender.com
+
+  # --- Redis replacement: Render Key Value (Redis-compatible) ---
+  - type: keyvalue
+    name: hackpton-redis
+    plan: starter
+    region: oregon
+    # Required by schema; empty list blocks all external access (good default)
+    ipAllowList: []
+
+databases:
+  - name: hackpton-db
+    plan: starter
+    region: oregon
+    # (optional) pin version or names:
+    # postgresMajorVersion: "17"
+    # databaseName: hackpton
+    # user: hackpton

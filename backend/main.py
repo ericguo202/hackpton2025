@@ -16,9 +16,8 @@ from rate_limit import RateLimitMiddleware
 from models.dbmodels import Charity
 from sqlalchemy.ext.asyncio import AsyncSession
 
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
-REDIS_DB   = int(os.getenv("REDIS_DB", "0"))
+REDIS_URL = os.getenv("REDIS_URL")
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "https://your-frontend.onrender.com").split(",")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -67,9 +66,7 @@ async def lifespan(app: FastAPI):
             session.add_all([e1, e2])
             await session.commit()
 
-    app.state.redis = redis.Redis(
-        host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True
-    )
+    app.state.redis = redis.from_url(REDIS_URL, decode_responses=True) 
 
     try:
         yield
@@ -89,7 +86,7 @@ app.add_middleware(GZipMiddleware, minimum_size=500)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
