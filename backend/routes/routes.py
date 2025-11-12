@@ -126,12 +126,15 @@ async def charity_login(
     url = request.url_for("get_charity", id=charity.id)
     resp = RedirectResponse(url, status_code=status.HTTP_303_SEE_OTHER)
 
+    # Determine if we're in production (HTTPS) or development
+    is_production = request.url.scheme == "https"
+    
     resp.set_cookie(
         key="sid",
         value=sid,
         httponly=True,
-        secure=True,  
-        samesite="none",
+        secure=is_production,  # Only require secure in production (HTTPS)
+        samesite="lax" if not is_production else "none",  # Use "lax" for same-origin, "none" for cross-origin
         max_age=3600,
         path="/",
     )

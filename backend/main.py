@@ -586,12 +586,14 @@ app.add_middleware(GZipMiddleware, minimum_size=500)
 # Access-Control-Allow-Origin: * is not allowed with Access-Control-Allow-Credentials: true.
 _raw_frontend_origins = os.getenv("FRONTEND_ORIGIN", "*")
 if _raw_frontend_origins.strip() == "*":
+    # If wildcard, allow all origins but disable credentials (cookies won't work cross-origin)
+    # However, if frontend and backend are same origin, we can allow credentials
     _allow_origins = ["*"]
+    _allow_credentials = False
 else:
     _allow_origins = [o.strip() for o in _raw_frontend_origins.split(",") if o.strip()]
-
-# If the origins list is exactly ["*"], credentials are not allowed by spec. Otherwise allow credentials.
-_allow_credentials = not (len(_allow_origins) == 1 and _allow_origins[0] == "*")
+    # Allow credentials when specific origins are set (needed for cookies)
+    _allow_credentials = True
 
 app.add_middleware(
     CORSMiddleware,
