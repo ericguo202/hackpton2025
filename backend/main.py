@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import redis.asyncio as redis
 from fastapi import FastAPI, HTTPException
+from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -625,12 +626,9 @@ if frontend_dist.exists():
     if static_dir.exists():
         app.mount("/assets", StaticFiles(directory=str(static_dir)), name="assets")
     
-    # Serve other static files from dist root (like vite.svg, etc.)
-    # This must come after /assets to avoid conflicts
-    app.mount("/static", StaticFiles(directory=str(frontend_dist / "static")), name="static")
+    # Note: Vite doesn't create a /static directory, so we don't mount it
     
     # Serve files from dist root (like vite.svg)
-    # Note: This is a catch-all for static files, so it should be last
     @app.get("/vite.svg")
     async def serve_vite_svg():
         """Serve vite.svg from dist root"""
@@ -638,3 +636,32 @@ if frontend_dist.exists():
         if svg_path.exists():
             return FileResponse(str(svg_path))
         raise HTTPException(status_code=404)
+    
+    # Catch-all route for SPA: serve index.html for any route that doesn't match API routes
+    # This must be the last route to catch all unmatched paths
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str, request: Request):
+        """
+        Serve the React app for client-side routing.
+        This catches all routes that don't match API endpoints or static files.
+        """
+        # Don't serve HTML for static assets, health check, or API routes
+        if (full_path.startswith("assets/") or 
+            full_path.startswith("static/") or
+            full_path == "health" or
+            full_path.startswith("api/") or
+            full_path == "vite.svg" or
+            full_path == "icon.svg"):
+            raise HTTPException(status_code=404)
+        
+        # Check if this is an API request (Accept header prefers application/json)
+        accept_header = request.headers.get("accept", "")
+        if "application/json" in accept_header.lower() and "text/html" not in accept_header.lower():
+            # This is likely an API request for a non-existent endpoint
+            raise HTTPException(status_code=404)
+        
+        # Serve index.html for all other routes (SPA routing)
+        index_path = frontend_dist / "index.html"
+        if index_path.exists():
+            return FileResponse(str(index_path))
+        raise HTTPException(status_code=404, detail="Frontend not built. Run 'npm run build' in frontend directory.")
