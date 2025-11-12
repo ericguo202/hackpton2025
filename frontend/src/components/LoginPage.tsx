@@ -31,32 +31,12 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-  const response = await fetch(`${API_BASE_URL}/charities/login`, {
+      const response = await fetch(`${API_BASE_URL}/charities/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Important: allows cookies to be sent/received
-        redirect: "manual", // Don't automatically follow redirects
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username: formData.username, password: formData.password }),
       });
-
-      // Check for redirect response (303)
-      if (response.type === "opaqueredirect" || response.status === 303) {
-        // The backend set the cookie and wants to redirect
-        // Get the redirect location from the response
-        const location = response.headers.get("Location");
-        if (location) {
-          window.location.href = location;
-        } else {
-          // Fallback: just reload the page, the cookie is set
-          window.location.href = "/";
-        }
-        return;
-      }
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -69,6 +49,12 @@ export default function LoginPage() {
         setIsLoading(false);
         return;
       }
+
+      // Success: server sets cookie on the response. Parse JSON for redirect.
+      const data = await response.json().catch(() => ({}));
+      const target = data.location || "/";
+      window.location.href = target;
+      return;
     } catch (err) {
       setError("Network error. Please check your connection.");
       setIsLoading(false);
