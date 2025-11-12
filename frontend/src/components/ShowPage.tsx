@@ -62,7 +62,10 @@ export default function ShowPage() {
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/charities/${charityId}`);
+        const response = await fetch(`${API_BASE_URL}/charities/${charityId}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
         
         if (!response.ok) {
           if (response.status === 404) {

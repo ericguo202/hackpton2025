@@ -42,7 +42,10 @@ export default function Home() {
     setSearchResults([]);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/charities`);
+      const response = await fetch(`${API_BASE_URL}/charities`, {
+        method: 'GET',
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch charities");
       }
