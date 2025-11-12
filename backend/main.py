@@ -602,6 +602,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Debug: log the CORS configuration at startup so we can confirm the rendered env was picked up
+print(f"CORS configured. allow_origins={_allow_origins} allow_credentials={_allow_credentials}")
 app.add_middleware(
     RateLimitMiddleware,
     limit=10,

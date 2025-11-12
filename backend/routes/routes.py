@@ -126,15 +126,25 @@ async def charity_login(
     url = request.url_for("get_charity", id=charity.id)
     resp = RedirectResponse(url, status_code=status.HTTP_303_SEE_OTHER)
 
-    # Determine if we're in production (HTTPS) or development
-    is_production = request.url.scheme == "https"
-    
+    # Determine if we're in production (HTTPS).
+    # When behind proxies (like Render), the original protocol is often in X-Forwarded-Proto.
+    proto = request.headers.get("x-forwarded-proto") or request.url.scheme
+    is_production = str(proto).split(",")[0].lower() == "https"
+
+    # Log cookie-setting for debugging on Render (will appear in logs)
+    print(f"[DEBUG] Setting session cookie sid={sid} is_production={is_production} proto={proto}")
+
+    # For cross-site auth, the cookie must be SameSite=None and Secure.
+    # In local development (http) we'll fall back to lax + non-secure for convenience.
+    cookie_samesite = "none" if is_production else "lax"
+    cookie_secure = is_production
+
     resp.set_cookie(
         key="sid",
         value=sid,
         httponly=True,
-        secure=is_production,  # Only require secure in production (HTTPS)
-        samesite="lax" if not is_production else "none",  # Use "lax" for same-origin, "none" for cross-origin
+        secure=cookie_secure,
+        samesite=cookie_samesite,
         max_age=3600,
         path="/",
     )
@@ -143,6 +153,13 @@ async def charity_login(
 @router.get("/charities/me", response_model=CharityRead)
 async def get_current_charity(db: SessionDep, r: RedisDep, request: Request):
     """Get the currently logged-in charity based on session cookie"""
+    # Debug logging: show incoming cookies and origin header so we can verify requests
+    try:
+        print("[DEBUG] /charities/me request.cookies:", dict(request.cookies))
+        print("[DEBUG] /charities/me Origin header:", request.headers.get("origin"))
+    except Exception:
+        # If printing fails, don't crash the endpoint
+        pass
     sid = request.cookies.get("sid")
     if not sid:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not logged in")
@@ -192,7 +209,10 @@ async def charity_logout(response: Response, request: Request, r: RedisDep):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
    
     await r.delete(f"session:{sid}")
-    response.delete_cookie(key="sid")
+    # When deleting cookie, ensure attributes match how it was set (path, samesite, secure)
+    proto = request.headers.get("x-forwarded-proto") or request.url.scheme
+    is_production = str(proto).split(",")[0].lower() == "https"
+    response.delete_cookie(key="sid", path="/")
     return {"ok": True}
 
 @router.get("/charities/{id}/edit")
